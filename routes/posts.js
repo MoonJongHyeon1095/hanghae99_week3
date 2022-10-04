@@ -5,7 +5,7 @@ const router = express.Router();
 const Posts = require("../schemas/posts");  
 
     
-/** 
+/** 배포환경 확인
  *GET 게시글목록 전체조회 
  *제목, 이름, 작성날짜
  *작성날짜 내림차순 정렬
@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
     
   }); 
 
- /** 
+ /** 배포환경 확인
   *  GET 게시글 상세조회
   *  제목, 이름, 글내용, 날짜
   */
@@ -39,7 +39,7 @@ router.get('/:postsId', async (req,res)=> {
   })
 
 
-/**
+/**배포환경 확인
  * POST 게시글 작성
  * 제목, 이름, 비밀번호, 글내용
  *  */ 
@@ -54,7 +54,7 @@ router.post("/", async (req, res) => {
   res.status(201).json({ posts: createdPosts, message: '게시글을 생성하였습니다.'});
 });
 
-/**
+/**배포환경 확인 But 하기의 에러 처리 안됨
  * DELETE
  * 비밀번호 일치시 게시글 삭제
  *  */ 
@@ -63,17 +63,34 @@ router.delete("/:postsId", async (req, res) => {
   const post = await Posts.find({ postsId: Number(postsId) });
   const {inputPassword} = req.body;
 
-  if (inputPassword !== post.postsPassword) {
-    res.json({ errorMessage: "번호가 다르다." });
-  return;
-}
-
-  if (inputPassword == post.postsPassword) {
-  await Posts.deleteOne({ postsId });
-}
-  
+  await Posts.find({ "postsPassword": Number(inputPassword)})   
+  .deleteOne({ postsId })
   res.json({ "message": "게시글을 삭제하였습니다."});
+
+  if (Number(inputPassword) !== post.postsPassword) {
+    res.json({ errorMessage: "번호가 다르다." });
+    return;
+  }  
 });
+
+/** 
+ * node:internal/errors:477
+    ErrorCaptureStackTrace(err);
+    ^
+
+Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+    at new NodeError (node:internal/errors:387:5)
+    at ServerResponse.setHeader (node:_http_outgoing:603:11)
+    at ServerResponse.header (/home/ubuntu/hh99w3_2/hanghae99_week3/node_modules/express/lib/response.js:794:10)
+    at ServerResponse.send (/home/ubuntu/hh99w3_2/hanghae99_week3/node_modules/express/lib/response.js:174:12)
+    at ServerResponse.json (/home/ubuntu/hh99w3_2/hanghae99_week3/node_modules/express/lib/response.js:278:15)
+    at /home/ubuntu/hh99w3_2/hanghae99_week3/routes/posts.js:71:9
+    at processTicksAndRejections (node:internal/process/task_queues:96:5) {
+  code: 'ERR_HTTP_HEADERS_SENT'
+}
+ * 
+*/
+
 
 
 /**
@@ -81,24 +98,19 @@ router.delete("/:postsId", async (req, res) => {
  * 게시글 수정, 비밀번호 검사
  */
  //const post = await Posts.find({ postsId: Number(postsId) });
-router.put("/:postsId", async (req, res, next) => {
+ router.put("/:postsId", async (req, res, next) => {
   const { postsId } = req.params;
   const {inputPassword} = req.body;
   const {postsContent} = req.body;
+ await Posts.find({"postsId":postsId}, {"postsPassword" : {$ne: Number(inputPassword) }});
 
-  await Posts.updateOne({"postsId":postsId, "password":inputPassword},
-  {"$set": postsContent})
-  .exec((err, resolve)=>{
-    if(err){
-      return next(err);
-    }
-    if (resolve.modifiedCount ===0){
-      return res.json({"message":"비밀번호가 틀렸다."})
-    }
-  })
- 
+  await Posts.updateOne({"postsId":postsId, "postsPassword":inputPassword},{"$set": {postsContent}})
   res.json({"message": "게시글을 수정하였습니다."})})
+    
 
+  if(testPassword==0){
+    return res.json({"message": "비밀번호가 틀렸다."});
+  }
   // https://www.mongodb.com/docs/manual/reference/operator/update/set/#mongodb-update-up.-set
 
 

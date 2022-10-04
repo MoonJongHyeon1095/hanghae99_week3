@@ -5,7 +5,7 @@ const router = express.Router();
 const Comments = require("../schemas/comments");  
 
 
-/**
+/** 배포환경 확인
  * POST 댓글입력
  *  
  */
@@ -23,36 +23,34 @@ router.post("/comments/:postsId", async (req, res) => {
 	res.status(201).json({ comments: createdComment, message: '댓글을 생성하였습니다.'});
 });
 
-/**
+/** 배포환경 확인
  * GET 댓글 목록
  * 작성날짜 내림차순 정렬
  */
 router.get("/comments/:postsId", async (req, res) => {
 	const { postsId } = req.params;
-	const comments = await Comments.find({ postsId: Number(postsId) });
-	const commentsList = [
-	  {'commentsName' : comments.commentsName},
-	  {'commentsContent' : comments.commentsContent},
-	  {'createdAt' : comments.createdAt}
-	]
-	res.json( {list : commentsList})
+	const comments = await Comments.find({ postsId: Number(postsId) })
+	.select({'commentsName':1, 'commentsContent':1, 'createdAt':1})
+	.sort({"createdAt" : "desc"})
+
+	res.json( {list : comments})
 });
  
-/**
- * DELETE
+/** 배포환경확인
+ * DELETE 
  * 댓글 삭제
  */
 router.delete("/comments/:commentsId", async (req, res) => {
 	const commentsId = req.params.commentsId;
-	const tryDelete = await Comments.find({ "_id" : commentsId })
-	Comments.deleteOne( tryDelete._id );
+	await Comments.find({ "_id" : commentsId })
+			.deleteOne({ "_id" : commentsId });
 	
 	res.json({ "message": "댓글을을 삭제하였습니다."});
   });
 
 
 /**
- * PUT
+ * PUT 배포환경 확인
  * 댓글수정
  */
 router.put("/comments/:commentsId", async (req, res) => {
