@@ -16,7 +16,7 @@ app.use(express.json())
 //routes
 const postsRouter = require("./routes/posts");
 const commentsRouter = require("./routes/comments");
-app.use([postsRouter, commentsRouter]);
+app.use('/posts', [postsRouter],[commentsRouter]) 
 
 //GET 
 app.get('/', (req, res) => {

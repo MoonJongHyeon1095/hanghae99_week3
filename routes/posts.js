@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
   *  GET 게시글 상세조회
   *  제목, 이름, 글내용, 날짜
   */
-router.get('/posts/:postsId', async (req,res)=> { 
+router.get('/:postsId', async (req,res)=> { 
   const {postsId} = req.params;
   // const postsId = req.params.postsId 
   // 위와 같다. //걍 구조분해 할당으로 해본 것.
@@ -45,7 +45,7 @@ router.get('/posts/:postsId', async (req,res)=> {
  *  */ 
 
 //async를 굳이 넣어야 하는 이유는?
-router.post("/posts", async (req, res) => {  
+router.post("/", async (req, res) => {  
   const { postsId, postsName, postsPassword, postsTitle, postsContent} = req.body; // 구조분해할당
 
   const createdPosts = await Posts.create({ postsId, postsName, postsPassword, postsTitle, postsContent });
@@ -58,7 +58,7 @@ router.post("/posts", async (req, res) => {
  * DELETE
  * 비밀번호 일치시 게시글 삭제
  *  */ 
-router.delete("/posts/:postsId", async (req, res) => {
+router.delete("/:postsId", async (req, res) => {
   const { postsId } = req.params;
   const post = await Posts.find({ postsId: Number(postsId) });
   const {inputPassword} = req.body;
@@ -81,7 +81,7 @@ router.delete("/posts/:postsId", async (req, res) => {
  * 게시글 수정, 비밀번호 검사
  */
  //const post = await Posts.find({ postsId: Number(postsId) });
-router.put("/posts/:postsId", async (req, res, next) => {
+router.put("/:postsId", async (req, res, next) => {
   const { postsId } = req.params;
   const {inputPassword} = req.body;
   const {postsContent} = req.body;
