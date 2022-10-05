@@ -62,15 +62,17 @@ router.delete("/:postsId", async (req, res) => {
   const { postsId } = req.params;
   const post = await Posts.find({ postsId: Number(postsId) });
   const {inputPassword} = req.body;
-
+try{
   await Posts.find({ "postsPassword": Number(inputPassword)})   
   .deleteOne({ postsId })
   res.json({ "message": "게시글을 삭제하였습니다."});
-
+}catch(err){console.log(err)}
+{
   if (Number(inputPassword) !== post.postsPassword) {
     res.json({ errorMessage: "번호가 다르다." });
     return;
-  }  
+  }
+}  
 });
 
 /** 
@@ -102,15 +104,19 @@ Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the cli
   const { postsId } = req.params;
   const {inputPassword} = req.body;
   const {postsContent} = req.body;
- await Posts.find({"postsId":postsId}, {"postsPassword" : {$ne: Number(inputPassword) }});
+  const post = await Posts.find({ postsId: Number(postsId) });
+ try{
+    if (Number(inputPassword) !== post.postsPassword) {
+      res.json({ errorMessage: "번호가 다르다." });
+      return;
+    }
 
-  await Posts.updateOne({"postsId":postsId, "postsPassword":inputPassword},{"$set": {postsContent}})
-  res.json({"message": "게시글을 수정하였습니다."})})
-    
-
-  if(testPassword==0){
-    return res.json({"message": "비밀번호가 틀렸다."});
+    await Posts.updateOne({"postsId":postsId, "postsPassword":inputPassword},{"$set": {postsContent}})
+    res.json({"message": "게시글을 수정하였습니다."})
   }
+    catch(err){console.log(err) }
+ 
+  })
   // https://www.mongodb.com/docs/manual/reference/operator/update/set/#mongodb-update-up.-set
 
 
