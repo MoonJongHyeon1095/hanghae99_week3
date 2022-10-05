@@ -1,5 +1,5 @@
 const express = require('express'); 
-// const { default: test } = require('node:test'); <-- 이게 뭘까? 왜 생겼을까?
+//const { default: test } = require('node:test'); //<-- 이게 뭘까? 왜 생겼을까?
 const router = express.Router();
 
 const Posts = require("../schemas/posts");  
@@ -32,7 +32,7 @@ router.get('/:postsId', async (req,res)=> {
   // 위와 같다. //걍 구조분해 할당으로 해본 것.
   
   const detail = await Posts.find({postsId:postsId}).select({
-    "postsTitle":1, "postName":1, "postContent":1, "createdAt":1
+    "_id":0, "postsTitle":1, "postsName":1, "postsContent":1, "createdAt":1
   })
   
   res.status(203).json({detailPage:detail})
@@ -62,17 +62,17 @@ router.delete("/:postsId", async (req, res) => {
   const { postsId } = req.params;
   const post = await Posts.find({ postsId: Number(postsId) });
   const {inputPassword} = req.body;
-try{
-  await Posts.find({ "postsPassword": Number(inputPassword)})   
-  .deleteOne({ postsId })
-  res.json({ "message": "게시글을 삭제하였습니다."});
-}catch(err){console.log(err)}
-{
+  
   if (Number(inputPassword) !== post.postsPassword) {
     res.json({ errorMessage: "번호가 다르다." });
     return;
-  }
-}  
+  } 
+
+  if (Number(inputPassword) == post.postsPassword){
+  await Posts.deleteOne({ postsId })}
+
+  res.json({ "message": "게시글을 삭제하였습니다."});
+
 });
 
 /** 
@@ -105,18 +105,18 @@ Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the cli
   const {inputPassword} = req.body;
   const {postsContent} = req.body;
   const post = await Posts.find({ postsId: Number(postsId) });
- try{
+  console.log(post)
+ 
     if (Number(inputPassword) !== post.postsPassword) {
       res.json({ errorMessage: "번호가 다르다." });
-      return;
-    }
-
-    await Posts.updateOne({"postsId":postsId, "postsPassword":inputPassword},{"$set": {postsContent}})
-    res.json({"message": "게시글을 수정하였습니다."})
-  }
-    catch(err){console.log(err) }
- 
-  })
+      return;}
+    
+    if (post.length){
+    await Posts
+    .updateOne({"postsId":postsId, "postsPassword":inputPassword},{"$set": {postsContent}})
+    res.json({"message": "게시글을 수정하였습니다."})}
+    })
+  
   // https://www.mongodb.com/docs/manual/reference/operator/update/set/#mongodb-update-up.-set
 
 
